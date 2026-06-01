@@ -1,0 +1,6 @@
+lib/*
+__pycache__/
+*.pyc
+.env
+*.DS_Store
+!lib/seeed_xiao_nrf52840.py
