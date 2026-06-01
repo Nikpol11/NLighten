@@ -1,0 +1,5 @@
+adafruit_ble
+adafruit_bluefruit_connect
+adafruit_lsm6ds
+adafruit_register
+neopixel
