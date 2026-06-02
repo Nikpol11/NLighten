@@ -22,6 +22,7 @@ uart = UARTService()
 advertisement = ProvideServicesAdvertisement(uart)
 
 def setup(name):
+    ble.stop_advertising()
     ble.name = name
 
 def connect():
@@ -52,7 +53,7 @@ def connected():
 
 def write(msg, newline=True):
     if newline:
-        msg.append("\n")
+        msg += "\n"
     uart.write(msg.encode())
     
 def read(in_wait):

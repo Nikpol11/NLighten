@@ -4,7 +4,7 @@ import digitalio
 from analogio import AnalogIn, AnalogOut
 import lib.seeed_xiao_nrf52840
 import ew_uart as ua
-import LED_Control
+from LED_Control import LED_Control
 ua.setup("NLighten")
 
 ldr = AnalogIn(board.A1)
@@ -15,7 +15,6 @@ ldrOut.value =  True
 
 led = neopixel.NeoPixel(board.D10, 7, auto_write = False, bpp=4)
 led.brightness = 0.1
-
 # imu = seeed_xiao_nrf52840.IMU()
 # bat = lib.seeed_xiao_nrf52840.Battery()
 # print(f"Charge complete: {bat.charge_status}")
@@ -42,7 +41,6 @@ TWO_THIRD = 2.0 / 3.0
 LED_Controls = LED_Control(led, ldr)
 counter = 0
 bleOff = False
-
 while True:
     if not ua.connected() and not bleOff:
         ua.start_advertising()
