@@ -2,10 +2,10 @@
 
 Welcome to Nlighten, a project for a Seeed Studio XIAO NRF52840 powered nightlight. It is a versatile smart lighting device designed to give you a light in the dark and fun in the light.
 It is built around the powerful Seeed Studio XIAO nRF52840 microcontroller and features
-Bluetooth Low Energy (BLE) control for seamless interaction with your smartphone or computer.
+Bluetooth Low Energy (BLE) control for seamless interaction with your smartphone or computer.<br>
 ![alt text](img/IMG_0503.jpg)
 ![alt text](img/IMG_9283.jpg)
-![alt text](img/IMG_9282.jpg)
+![alt text](img/IMG_9282.jpg)<br>
 Whether placed on your nightstand, desk, or shelf, this nightlight offers convenience through a combination of automatic sensor
 adjustments and remote web/mobile control. It is fully compatible with CircuitPython, allowing you to customize its behavior further
 using the extensive libraries available in the ecosystem.
