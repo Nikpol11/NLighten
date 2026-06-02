@@ -131,6 +131,9 @@ while True:
                 elif text[:15] == "setsaturation::":
                     LED_Controls.hsv[1] = max(0.0, min(1.0, float(text[15:])))
                     ua.write(f"Saturation: {round(LED_Controls.hsv[1] * 100)}%")
+                elif text[:9] == "setvalue::":
+                    LED_Controls.hsv[2] = float(text[9:])
+                    ua.write(f"Value: {round(LED_Controls.hsv[2] * 100)}%")
                 elif text[:17] == "setwhitebalance::":
                     LED_Controls.set_white_balance(text[17:])
                     ua.write(f"White balance: {round(LED_Controls.white_balance * 100)}% W")
