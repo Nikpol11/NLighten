@@ -1,0 +1,1354 @@
+<!-- Generated using Claude 4.6 Sonnet -->
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nlighten Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0a0c10;
+        --surface: #111318;
+        --surface2: #191c24;
+        --border: #2a2e3a;
+        --accent: #00e5ff;
+        --accent2: #ff6b35;
+        --accent3: #b8ff57;
+        --text: #e8eaf0;
+        --text-dim: #6b7280;
+        --glow: rgba(0, 229, 255, 0.15);
+        --glow-strong: rgba(0, 229, 255, 0.35);
+        --font-mono: "Share Tech Mono", monospace;
+        --font-display: "Orbitron", sans-serif;
+        --font-body: "DM Sans", sans-serif;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--font-body);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Scanlines overlay */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background: repeating-linear-gradient(
+          0deg,
+          transparent,
+          transparent 2px,
+          rgba(0, 0, 0, 0.07) 2px,
+          rgba(0, 0, 0, 0.07) 4px
+        );
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      /* Grid background */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(0, 229, 255, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 229, 255, 0.03) 1px, transparent 1px);
+        background-size: 40px 40px;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .page {
+        position: relative;
+        z-index: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 80px;
+      }
+
+      /* ── Header ── */
+      header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 32px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .logo {
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 900;
+        letter-spacing: 0.15em;
+        color: var(--accent);
+        text-shadow:
+          0 0 20px var(--glow-strong),
+          0 0 40px var(--glow);
+      }
+
+      .logo span {
+        color: var(--text-dim);
+        font-weight: 400;
+      }
+
+      #connect-btn {
+        font-family: var(--font-display);
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        padding: 10px 24px;
+        background: transparent;
+        border: 1.5px solid var(--accent);
+        color: var(--accent);
+        cursor: pointer;
+        transition: all 0.2s;
+        text-transform: uppercase;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #connect-btn::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--accent);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.2s;
+        z-index: -1;
+      }
+
+      #connect-btn:hover::before {
+        transform: scaleX(1);
+      }
+      #connect-btn:hover {
+        color: var(--bg);
+      }
+      #connect-btn.connected {
+        border-color: var(--accent3);
+        color: var(--accent3);
+      }
+      #connect-btn.connected::before {
+        background: var(--accent3);
+      }
+
+      .status-dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--text-dim);
+        margin-right: 8px;
+        transition: all 0.3s;
+      }
+      .status-dot.on {
+        background: var(--accent3);
+        box-shadow: 0 0 8px var(--accent3);
+        animation: blink 2s ease-in-out infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      /* ── Layout Grid ── */
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 16px;
+      }
+
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+      .grid-1 {
+        grid-template-columns: 1fr;
+      }
+      .span-2 {
+        grid-column: span 2;
+      }
+      .span-3 {
+        grid-column: span 3;
+      }
+
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .span-3 {
+          grid-column: span 2;
+        }
+      }
+      @media (max-width: 600px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+        .span-2,
+        .span-3 {
+          grid-column: span 1;
+        }
+      }
+
+      /* ── Panel ── */
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        padding: 20px;
+        position: relative;
+      }
+
+      .panel::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+      }
+
+      .panel-title {
+        font-family: var(--font-display);
+        font-size: 0.6rem;
+        letter-spacing: 0.18em;
+        color: var(--accent);
+        text-transform: uppercase;
+        margin-bottom: 16px;
+        opacity: 0.8;
+      }
+
+      /* ── Color Wheel ── */
+      #color-wheel-wrap {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+
+      #colorWheel {
+        cursor: crosshair;
+        border-radius: 50%;
+        width: 180px;
+        height: 180px;
+        display: block;
+        box-shadow:
+          0 0 20px rgba(0, 0, 0, 0.6),
+          0 0 40px var(--glow);
+      }
+
+      .wheel-crosshair {
+        position: relative;
+        display: inline-block;
+      }
+
+      #wheel-cursor {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        box-shadow: 0 0 6px rgba(0, 0, 0, 0.8);
+        transition:
+          left 0.08s,
+          top 0.08s;
+      }
+
+      /* ── Sliders ── */
+      .slider-row {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        margin-bottom: 14px;
+      }
+
+      .slider-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        color: var(--text-dim);
+      }
+
+      .slider-label .val {
+        color: var(--accent);
+        min-width: 42px;
+        text-align: right;
+      }
+
+      input[type="range"] {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 4px;
+        background: var(--surface2);
+        border-radius: 0;
+        outline: none;
+        cursor: pointer;
+      }
+
+      input[type="range"].hue-slider {
+        background: linear-gradient(
+          to right,
+          hsl(0, 100%, 50%),
+          hsl(30, 100%, 50%),
+          hsl(60, 100%, 50%),
+          hsl(120, 100%, 50%),
+          hsl(180, 100%, 50%),
+          hsl(240, 100%, 50%),
+          hsl(300, 100%, 50%),
+          hsl(360, 100%, 50%)
+        );
+      }
+
+      input[type="range"].sat-slider {
+        background: linear-gradient(to right, #888, var(--accent));
+      }
+
+      input[type="range"].val-slider {
+        background: linear-gradient(to right, #000, #fff);
+      }
+
+      input[type="range"].bright-slider {
+        background: linear-gradient(to right, #000, var(--accent3));
+      }
+
+      input[type="range"].wb-slider {
+        background: linear-gradient(to right, #ffaa44, #ffffff);
+      }
+
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--text);
+        border: 2px solid var(--accent);
+        box-shadow: 0 0 8px var(--glow-strong);
+        cursor: pointer;
+      }
+
+      input[type="range"]::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--text);
+        border: 2px solid var(--accent);
+        box-shadow: 0 0 8px var(--glow-strong);
+        cursor: pointer;
+      }
+
+      /* ── Dual Range (LDR) ── */
+      .dual-range-wrap {
+        position: relative;
+        height: 32px;
+        margin: 8px 0 4px;
+      }
+
+      .dual-range-wrap input[type="range"] {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        background: transparent;
+      }
+
+      .dual-range-wrap input[type="range"]::-webkit-slider-thumb {
+        pointer-events: all;
+      }
+      .dual-range-wrap input[type="range"]::-moz-range-thumb {
+        pointer-events: all;
+      }
+
+      #ldr-track {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        height: 4px;
+        left: 0;
+        right: 0;
+        background: var(--surface2);
+      }
+
+      #ldr-fill {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        background: var(--accent);
+        transition:
+          left 0.1s,
+          width 0.1s;
+      }
+
+      .ldr-inputs {
+        display: flex;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .ldr-inputs label {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        color: var(--text-dim);
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        flex: 1;
+      }
+
+      .ldr-inputs input[type="number"] {
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text);
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        padding: 6px 10px;
+        width: 100%;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+
+      .ldr-inputs input[type="number"]:focus {
+        border-color: var(--accent);
+      }
+
+      /* ── Buttons ── */
+      .btn-row {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn {
+        font-family: var(--font-display);
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 10px 18px;
+        background: transparent;
+        border: 1.5px solid var(--border);
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 0.15s;
+        flex: 1;
+      }
+
+      .btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--glow);
+      }
+
+      .btn.nav {
+        font-size: 1rem;
+        padding: 10px 20px;
+      }
+
+      /* ── Mode Grid ── */
+      .mode-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 8px;
+      }
+
+      .mode-btn {
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+        padding: 10px 8px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        color: var(--text-dim);
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: center;
+        line-height: 1.3;
+      }
+
+      .mode-btn:hover {
+        border-color: var(--accent);
+        color: var(--text);
+        background: var(--glow);
+      }
+
+      .mode-btn.active {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: var(--glow);
+        box-shadow: inset 0 0 12px var(--glow);
+      }
+
+      /* ── UART Log ── */
+      #uart-log {
+        background: var(--bg);
+        border: 1px solid var(--border);
+        height: 180px;
+        overflow-y: auto;
+        padding: 10px 14px;
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        color: var(--accent3);
+        line-height: 1.7;
+        scroll-behavior: smooth;
+      }
+
+      #uart-log::-webkit-scrollbar {
+        width: 4px;
+      }
+      #uart-log::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #uart-log::-webkit-scrollbar-thumb {
+        background: var(--border);
+      }
+
+      .log-line {
+        display: block;
+      }
+      .log-line.sys {
+        color: var(--text-dim);
+      }
+      .log-line.err {
+        color: #ff4d4d;
+      }
+      .log-line.sent {
+        color: var(--accent);
+      }
+
+      .log-line::before {
+        content: "> ";
+        opacity: 0.4;
+      }
+
+      /* ── Color Preview ── */
+      #color-preview {
+        width: 100%;
+        height: 48px;
+        border-radius: 0;
+        border: 1px solid var(--border);
+        margin-top: 12px;
+        transition: background 0.2s;
+        position: relative;
+      }
+
+      #color-preview-label {
+        position: absolute;
+        bottom: 100%;
+        font-family: var(--font-mono);
+        font-size: 0.68rem;
+        color: var(--text-dim);
+        margin-bottom: 6px;
+      }
+
+      /* ── Brightness preview bar ── */
+      .bright-bar {
+        width: 100%;
+        height: 6px;
+        background: linear-gradient(to right, #000, var(--accent3));
+        margin-top: 4px;
+      }
+
+      .section-gap {
+        margin-top: 16px;
+      }
+
+      /* ── Disabled state ── */
+      .disabled-overlay {
+        pointer-events: none;
+        opacity: 0.4;
+      }
+
+      /* ── Tooltip ── */
+      [title] {
+        cursor: help;
+      }
+
+      /* ── Small send btn ── */
+      .ldr-send-btn {
+        font-family: var(--font-display);
+        font-size: 0.6rem;
+        letter-spacing: 0.1em;
+        padding: 8px 14px;
+        background: transparent;
+        border: 1px solid var(--accent);
+        color: var(--accent);
+        cursor: pointer;
+        margin-top: 10px;
+        text-transform: uppercase;
+        transition: all 0.15s;
+        width: 100%;
+      }
+      .ldr-send-btn:hover {
+        background: var(--glow);
+      }
+
+      footer {
+        margin-top: 40px;
+        text-align: center;
+        font-family: var(--font-mono);
+        font-size: 0.65rem;
+        color: var(--text-dim);
+        opacity: 0.5;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <div class="logo">N<span>lighten</span></div>
+        <div style="display: flex; align-items: center; gap: 16px">
+          <span
+            style="
+              font-family: var(--font-mono);
+              font-size: 0.7rem;
+              color: var(--text-dim);
+            "
+          >
+            <span class="status-dot" id="status-dot"></span>
+            <span id="status-text">DISCONNECTED</span>
+          </span>
+          <button id="connect-btn" onclick="toggleConnect()">Connect</button>
+        </div>
+      </header>
+
+      <!-- Main controls -->
+      <div class="grid" id="main-grid">
+        <!-- Color Wheel + HSV -->
+        <div class="panel">
+          <div class="panel-title">Color</div>
+          <div id="color-wheel-wrap">
+            <div class="wheel-crosshair">
+              <canvas id="colorWheel" width="180" height="180"></canvas>
+              <div id="wheel-cursor"></div>
+            </div>
+          </div>
+          <div style="position: relative; margin-top: 14px">
+            <div id="color-preview-label">Preview</div>
+            <div id="color-preview"></div>
+          </div>
+        </div>
+
+        <!-- HSV Sliders -->
+        <div class="panel">
+          <div class="panel-title">HSV Sliders</div>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>Hue</span><span class="val" id="hue-val">0°</span>
+            </div>
+            <input
+              type="range"
+              class="hue-slider"
+              id="hue-slider"
+              min="0"
+              max="360"
+              value="0"
+              oninput="onHueSlider(this.value)"
+            />
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>Saturation</span><span class="val" id="sat-val">100%</span>
+            </div>
+            <input
+              type="range"
+              class="sat-slider"
+              id="sat-slider"
+              min="0"
+              max="100"
+              value="100"
+              oninput="onSatSlider(this.value)"
+            />
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>Value</span><span class="val" id="val-val">100%</span>
+            </div>
+            <input
+              type="range"
+              class="val-slider"
+              id="val-slider"
+              min="0"
+              max="100"
+              value="100"
+              oninput="onValSlider(this.value)"
+            />
+          </div>
+
+          <div class="section-gap"></div>
+          <div class="panel-title">Brightness & White Balance</div>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>Brightness</span
+              ><span class="val" id="bright-val">75%</span>
+            </div>
+            <input
+              type="range"
+              class="bright-slider"
+              id="bright-slider"
+              min="0"
+              max="100"
+              value="75"
+              oninput="onBrightSlider(this.value)"
+            />
+          </div>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>White Balance</span
+              ><span class="val" id="wb-val">50%W</span>
+            </div>
+            <input
+              type="range"
+              class="wb-slider"
+              id="wb-slider"
+              min="0"
+              max="100"
+              value="50"
+              oninput="onWBSlider(this.value)"
+            />
+          </div>
+        </div>
+
+        <!-- Nav + LDR -->
+        <div class="panel">
+          <div class="panel-title">Mode Navigation</div>
+          <div class="btn-row" style="margin-bottom: 16px">
+            <button
+              class="btn nav"
+              onclick="sendCommand('LEFT')"
+              title="Previous Mode"
+            >
+              ◀
+            </button>
+            <button
+              class="btn nav"
+              onclick="sendCommand('RIGHT')"
+              title="Next Mode"
+            >
+              ▶
+            </button>
+          </div>
+          <div
+            id="current-mode-display"
+            style="
+              font-family: var(--font-mono);
+              font-size: 0.75rem;
+              color: var(--text-dim);
+              text-align: center;
+              margin-bottom: 16px;
+              min-height: 1.2em;
+            "
+          >
+            — no mode selected —
+          </div>
+
+          <div class="section-gap"></div>
+          <div class="panel-title">LDR Threshold</div>
+          <div
+            style="
+              font-family: var(--font-mono);
+              font-size: 0.68rem;
+              color: var(--text-dim);
+              margin-bottom: 6px;
+            "
+          >
+            Drag to set ON/OFF light trigger range (0–65535)
+          </div>
+          <div class="dual-range-wrap">
+            <div id="ldr-track"><div id="ldr-fill"></div></div>
+            <input
+              type="range"
+              id="ldr-low"
+              min="0"
+              max="65535"
+              value="100"
+              oninput="onLdrRange()"
+            />
+            <input
+              type="range"
+              id="ldr-high"
+              min="0"
+              max="65535"
+              value="10000"
+              oninput="onLdrRange()"
+            />
+          </div>
+          <div class="ldr-inputs">
+            <label
+              >ON below
+              <input
+                type="number"
+                id="ldr-low-num"
+                min="0"
+                max="65535"
+                value="100"
+                onchange="onLdrNumInput()"
+              />
+            </label>
+            <label
+              >OFF above
+              <input
+                type="number"
+                id="ldr-high-num"
+                min="0"
+                max="65535"
+                value="10000"
+                onchange="onLdrNumInput()"
+              />
+            </label>
+          </div>
+          <button class="ldr-send-btn" onclick="sendLdrThreshold()">
+            Set Threshold
+          </button>
+        </div>
+
+        <!-- Mode Buttons -->
+        <div class="panel span-3">
+          <div class="panel-title">Lighting Modes</div>
+          <div class="mode-grid" id="mode-grid"></div>
+        </div>
+
+        <!-- UART Log -->
+        <div class="panel span-3">
+          <div
+            class="panel-title"
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            "
+          >
+            <span>UART Log</span>
+            <button
+              onclick="clearLog()"
+              style="
+                font-family: var(--font-mono);
+                font-size: 0.65rem;
+                background: transparent;
+                border: none;
+                color: var(--text-dim);
+                cursor: pointer;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+              "
+            >
+              Clear
+            </button>
+          </div>
+          <div id="uart-log"></div>
+        </div>
+      </div>
+      <!-- /grid -->
+
+      <footer>
+        Nlighten Controller &nbsp;·&nbsp; Web BLE Interface &nbsp;·&nbsp;
+        CircuitPython / Seeed XIAO nRF52840
+      </footer>
+    </div>
+
+    <script>
+      // ──────────────────────────────────────────────
+      //  Modes list (matches LED_Control.modes order)
+      // ──────────────────────────────────────────────
+      const MODES = [
+        { name: "Rainbow Hue Fade", cmd: "rainbowHueFade" },
+        { name: "All White", cmd: "allWhite" },
+        { name: "Single White", cmd: "singleWhite" },
+        { name: "RGB White", cmd: "rgbWhite" },
+        { name: "Single All White", cmd: "singleAllWhite" },
+        { name: "Single Rainbow", cmd: "singleRainbowHueFade" },
+        { name: "Breathing", cmd: "breathingEffect" },
+        { name: "Sparkle", cmd: "sparkleEffect" },
+        { name: "Fire", cmd: "fireEffect" },
+        { name: "Color Wipe", cmd: "colorWipeEffect" },
+        { name: "Pulse", cmd: "pulseEffect" },
+        { name: "Rainbow Cycle", cmd: "rainbowCycle" },
+        { name: "Starburst", cmd: "starburstEffect" },
+        { name: "Meteor", cmd: "meteorEffect" },
+        { name: "Water", cmd: "waterEffect" },
+        { name: "Multicolor Strobe", cmd: "multicolorStrobe" },
+        { name: "Gradient", cmd: "gradientEffect" },
+        { name: "Night Sky", cmd: "nightSkyEffect" },
+        { name: "Autumn", cmd: "autumnEffect" },
+        { name: "Heartbeat", cmd: "heartbeatEffect" },
+        { name: "Aurora", cmd: "auroraEffect" },
+        { name: "Simple Color", cmd: "simpleColor" },
+        { name: "Single Simple Color", cmd: "singleSimpleColor" },
+      ];
+
+      // ──────────────────────────────────────────────
+      //  BLE globals
+      // ──────────────────────────────────────────────
+      const BLE_SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e"; // Nordic UART
+      const BLE_TX_CHAR_UUID = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // Write (TX from web)
+      const BLE_RX_CHAR_UUID = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // Notify (RX to web)
+
+      let bleDevice = null,
+        bleServer = null,
+        txChar = null;
+      let connected = false;
+      let activeMode = null;
+
+      // ──────────────────────────────────────────────
+      //  State
+      // ──────────────────────────────────────────────
+      let hue = 0,
+        sat = 1.0,
+        val = 1.0;
+      let brightness = 0.75;
+      let whiteBalance = 0.5;
+      let ldrLow = 100,
+        ldrHigh = 10000;
+
+      // Debounce timers
+      let hueSendTimer,
+        satSendTimer,
+        valSendTimer = null,
+        brightSendTimer,
+        wbSendTimer;
+
+      // ──────────────────────────────────────────────
+      //  BLE Connect / Disconnect
+      // ──────────────────────────────────────────────
+      async function toggleConnect() {
+        if (connected) {
+          await disconnectBLE();
+          return;
+        }
+        if (!navigator.bluetooth) {
+          log("Web Bluetooth not supported in this browser.", "err");
+          return;
+        }
+        try {
+          log("Scanning for NLighten...", "sys");
+          bleDevice = await navigator.bluetooth.requestDevice({
+            filters: [{ name: "NLighten" }],
+            optionalServices: [BLE_SERVICE_UUID],
+          });
+          bleDevice.addEventListener("gattserverdisconnected", onDisconnected);
+          bleServer = await bleDevice.gatt.connect();
+          const service = await bleServer.getPrimaryService(BLE_SERVICE_UUID);
+          txChar = await service.getCharacteristic(BLE_TX_CHAR_UUID);
+          const rxChar = await service.getCharacteristic(BLE_RX_CHAR_UUID);
+          await rxChar.startNotifications();
+          rxChar.addEventListener("characteristicvaluechanged", onRxData);
+          setConnected(true);
+          log("Connected to NLighten.", "sys");
+        } catch (e) {
+          log(`Connection failed: ${e.message}`, "err");
+        }
+      }
+
+      function onDisconnected() {
+        setConnected(false);
+        log("Device disconnected.", "sys");
+      }
+
+      async function disconnectBLE() {
+        if (bleDevice && bleDevice.gatt.connected) {
+          bleDevice.gatt.disconnect();
+        }
+        setConnected(false);
+      }
+
+      function setConnected(state) {
+        connected = state;
+        const btn = document.getElementById("connect-btn");
+        const dot = document.getElementById("status-dot");
+        const txt = document.getElementById("status-text");
+        if (state) {
+          btn.textContent = "Disconnect";
+          btn.classList.add("connected");
+          dot.classList.add("on");
+          txt.textContent = "CONNECTED";
+        } else {
+          btn.textContent = "Connect";
+          btn.classList.remove("connected");
+          dot.classList.remove("on");
+          txt.textContent = "DISCONNECTED";
+          txChar = null;
+        }
+      }
+
+      // ──────────────────────────────────────────────
+      //  Send
+      // ──────────────────────────────────────────────
+      async function sendRaw(text) {
+        if (!txChar) {
+          log("Not connected.", "err");
+          return;
+        }
+        try {
+          const enc = new TextEncoder();
+          await txChar.writeValue(enc.encode(text + "\n"));
+        } catch (e) {
+          log(`Send error: ${e.message}`, "err");
+        }
+      }
+
+      function sendCommand(cmd) {
+        log(cmd, "sent");
+        // D-pad / button commands are sent as raw text matching button_map values
+        // The firmware reads these via ua.button_press which parses ButtonPacket —
+        // but the text commands branch handles plain text strings for everything else.
+        // For nav buttons, we fake the Bluefruit button packets that the firmware expects.
+        const btPackets = {
+          UP: "!B508",
+          DOWN: "!B607",
+          LEFT: "!B806",
+          RIGHT: "!B705",
+          1: "!B109",
+          2: "!B209",
+          3: "!B309",
+          4: "!B409",
+        };
+        if (btPackets[cmd]) {
+          sendRaw(btPackets[cmd]);
+        } else {
+          sendRaw(cmd);
+        }
+      }
+
+      function sendTextCmd(cmd) {
+        log(cmd, "sent");
+        sendRaw(cmd);
+      }
+
+      // ──────────────────────────────────────────────
+      //  RX handler
+      // ──────────────────────────────────────────────
+      function onRxData(event) {
+        const dec = new TextDecoder();
+        const text = dec.decode(event.target.value).trim();
+        if (text) log(text);
+      }
+
+      // ──────────────────────────────────────────────
+      //  Log
+      // ──────────────────────────────────────────────
+      function log(msg, cls = "") {
+        const container = document.getElementById("uart-log");
+        const line = document.createElement("span");
+        line.className = "log-line" + (cls ? " " + cls : "");
+        const ts = new Date().toLocaleTimeString("en-US", { hour12: false });
+        line.textContent = `[${ts}] ${msg}`;
+        container.appendChild(line);
+        container.appendChild(document.createElement("br"));
+        container.scrollTop = container.scrollHeight;
+      }
+
+      function clearLog() {
+        document.getElementById("uart-log").innerHTML = "";
+      }
+
+      // ──────────────────────────────────────────────
+      //  Mode Buttons
+      // ──────────────────────────────────────────────
+      function buildModeGrid() {
+        const grid = document.getElementById("mode-grid");
+        MODES.forEach((m, idx) => {
+          const btn = document.createElement("button");
+          btn.className = "mode-btn";
+          btn.id = `mode-btn-${idx}`;
+          btn.textContent = m.name;
+          btn.onclick = () => selectMode(idx);
+          grid.appendChild(btn);
+        });
+      }
+
+      function selectMode(idx) {
+        // Deactivate all
+        document
+          .querySelectorAll(".mode-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById(`mode-btn-${idx}`).classList.add("active");
+        activeMode = idx;
+        document.getElementById("current-mode-display").textContent =
+          MODES[idx].name;
+        sendTextCmd(`setmode::${MODES[idx].cmd}`);
+      }
+
+      // ──────────────────────────────────────────────
+      //  Color Wheel
+      // ──────────────────────────────────────────────
+      function drawColorWheel() {
+        const canvas = document.getElementById("colorWheel");
+        const ctx = canvas.getContext("2d");
+        const cx = canvas.width / 2,
+          cy = canvas.height / 2,
+          r = cx;
+
+        for (let angle = 0; angle < 360; angle++) {
+          const startAngle = ((angle - 1) * Math.PI) / 180;
+          const endAngle = ((angle + 1) * Math.PI) / 180;
+          const gradient = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+          gradient.addColorStop(0, `hsl(${angle}, 0%, ${val * 50}%)`);
+          gradient.addColorStop(1, `hsl(${angle}, 100%, ${val * 50}%)`);
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, r, startAngle, endAngle);
+          ctx.closePath();
+          ctx.fillStyle = gradient;
+          ctx.fill();
+        }
+
+        // Dark center overlay for value
+        if (val < 1) {
+          ctx.beginPath();
+          ctx.arc(cx, cy, r, 0, 2 * Math.PI);
+          const darken = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+          const alpha = 1 - val;
+          darken.addColorStop(0, `rgba(0,0,0,${alpha})`);
+          darken.addColorStop(1, `rgba(0,0,0,${alpha})`);
+          ctx.fillStyle = darken;
+          ctx.fill();
+        }
+      }
+
+      function hsvToCssColor(h, s, v) {
+        // h: 0-1, s: 0-1, v: 0-1
+        const hDeg = h * 360;
+        const l = v * (1 - s / 2);
+        const sl = l === 0 || l === 1 ? 0 : (v - l) / Math.min(l, 1 - l);
+        return `hsl(${hDeg}, ${(sl * 100).toFixed(1)}%, ${(l * 100).toFixed(1)}%)`;
+      }
+
+      function updateColorPreview() {
+        const col = hsvToCssColor(hue / 360, sat, val);
+        document.getElementById("color-preview").style.background = col;
+      }
+
+      function updateWheelCursor() {
+        const canvas = document.getElementById("colorWheel");
+        const r = canvas.width / 2;
+        const cx = canvas.width / 2,
+          cy = canvas.height / 2;
+        const angle = (hue * Math.PI) / 180;
+        const dist = sat * r;
+        const x = cx + dist * Math.cos(angle);
+        const y = cy + dist * Math.sin(angle);
+        const cursor = document.getElementById("wheel-cursor");
+        cursor.style.left = x + "px";
+        cursor.style.top = y + "px";
+      }
+
+      document
+        .getElementById("colorWheel")
+        .addEventListener("mousedown", startWheelDrag);
+      document
+        .getElementById("colorWheel")
+        .addEventListener("touchstart", startWheelDrag, { passive: false });
+
+      let wheelDragging = false;
+
+      function startWheelDrag(e) {
+        wheelDragging = true;
+        handleWheelMove(e);
+      }
+
+      document.addEventListener("mousemove", (e) => {
+        if (wheelDragging) handleWheelMove(e);
+      });
+      document.addEventListener("mouseup", () => {
+        wheelDragging = false;
+      });
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (wheelDragging) {
+            e.preventDefault();
+            handleWheelMove(e);
+          }
+        },
+        { passive: false },
+      );
+      document.addEventListener("touchend", () => {
+        wheelDragging = false;
+      });
+
+      function handleWheelMove(e) {
+        const canvas = document.getElementById("colorWheel");
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const x = clientX - rect.left - rect.width / 2;
+        const y = clientY - rect.top - rect.height / 2;
+        const r = rect.width / 2;
+        const dist = Math.min(Math.sqrt(x * x + y * y), r);
+        const angle = Math.atan2(y, x);
+
+        hue = ((angle * 180) / Math.PI + 360) % 360;
+        sat = dist / r;
+
+        syncSlidersFromState();
+        updateWheelCursor();
+        updateColorPreview();
+        scheduleSendHue();
+        scheduleSendSat();
+      }
+
+      // ──────────────────────────────────────────────
+      //  Slider handlers
+      // ──────────────────────────────────────────────
+      function onHueSlider(v) {
+        hue = parseFloat(v);
+        document.getElementById("hue-val").textContent = `${Math.round(hue)}°`;
+        updateWheelCursor();
+        updateColorPreview();
+        clearTimeout(hueSendTimer);
+        hueSendTimer = setTimeout(() => {
+          sendTextCmd(`sethue::${(hue / 360).toFixed(4)}`);
+        }, 120);
+      }
+
+      function scheduleSendHue() {
+        clearTimeout(hueSendTimer);
+        hueSendTimer = setTimeout(() => {
+          sendTextCmd(`sethue::${(hue / 360).toFixed(4)}`);
+        }, 120);
+      }
+
+      function onSatSlider(v) {
+        sat = parseFloat(v) / 100;
+        document.getElementById("sat-val").textContent =
+          `${Math.round(sat * 100)}%`;
+        updateWheelCursor();
+        updateColorPreview();
+        clearTimeout(satSendTimer);
+        satSendTimer = setTimeout(() => {
+          sendTextCmd(`setsaturation::${sat.toFixed(4)}`);
+        }, 120);
+      }
+
+      function scheduleSendSat() {
+        clearTimeout(satSendTimer);
+        satSendTimer = setTimeout(() => {
+          sendTextCmd(`setsaturation::${sat.toFixed(4)}`);
+        }, 120);
+      }
+
+      function onValSlider(v) {
+        val = parseFloat(v) / 100;
+        document.getElementById("val-val").textContent =
+          `${Math.round(val * 100)}%`;
+        drawColorWheel();
+        updateWheelCursor();
+        updateColorPreview();
+        clearTimeout(valSendTimer);
+        valSendTimer = setTimeout(() => {
+          sendTextCmd(`setvalue::${val.toFixed(4)}`);
+        }, 120);
+      }
+
+      function onBrightSlider(v) {
+        brightness = parseFloat(v) / 100;
+        document.getElementById("bright-val").textContent =
+          `${Math.round(brightness * 100)}%`;
+        clearTimeout(brightSendTimer);
+        brightSendTimer = setTimeout(() => {
+          sendTextCmd(`setbright::${brightness.toFixed(4)}`);
+        }, 120);
+      }
+
+      function onWBSlider(v) {
+        whiteBalance = parseFloat(v) / 100;
+        document.getElementById("wb-val").textContent =
+          `${Math.round(whiteBalance * 100)}%W`;
+        clearTimeout(wbSendTimer);
+        wbSendTimer = setTimeout(() => {
+          sendTextCmd(`setwhitebalance::${whiteBalance.toFixed(4)}`);
+        }, 120);
+      }
+
+      function syncSlidersFromState() {
+        document.getElementById("hue-slider").value = hue;
+        document.getElementById("hue-val").textContent = `${Math.round(hue)}°`;
+        document.getElementById("sat-slider").value = Math.round(sat * 100);
+        document.getElementById("sat-val").textContent =
+          `${Math.round(sat * 100)}%`;
+      }
+
+      // ──────────────────────────────────────────────
+      //  LDR Dual Range
+      // ──────────────────────────────────────────────
+      function onLdrRange() {
+        let low = parseInt(document.getElementById("ldr-low").value);
+        let high = parseInt(document.getElementById("ldr-high").value);
+        if (low > high) [low, high] = [high, low];
+        ldrLow = low;
+        ldrHigh = high;
+        document.getElementById("ldr-low-num").value = low;
+        document.getElementById("ldr-high-num").value = high;
+        updateLdrFill();
+      }
+
+      function onLdrNumInput() {
+        let low = parseInt(document.getElementById("ldr-low-num").value) || 0;
+        let high = parseInt(document.getElementById("ldr-high-num").value) || 0;
+        low = Math.max(0, Math.min(65535, low));
+        high = Math.max(0, Math.min(65535, high));
+        if (low > high) [low, high] = [high, low];
+        ldrLow = low;
+        ldrHigh = high;
+        document.getElementById("ldr-low").value = low;
+        document.getElementById("ldr-high").value = high;
+        document.getElementById("ldr-low-num").value = low;
+        document.getElementById("ldr-high-num").value = high;
+        updateLdrFill();
+      }
+
+      function updateLdrFill() {
+        const fill = document.getElementById("ldr-fill");
+        const pctLow = (ldrLow / 65535) * 100;
+        const pctHigh = (ldrHigh / 65535) * 100;
+        fill.style.left = pctLow + "%";
+        fill.style.width = pctHigh - pctLow + "%";
+      }
+
+      function sendLdrThreshold() {
+        sendTextCmd(`setthreshold::${ldrLow},${ldrHigh}`);
+      }
+
+      // ──────────────────────────────────────────────
+      //  Init
+      // ──────────────────────────────────────────────
+      function init() {
+        buildModeGrid();
+        drawColorWheel();
+        updateWheelCursor();
+        updateColorPreview();
+        updateLdrFill();
+        log("Nlighten web controller ready.", "sys");
+        log("Click Connect to pair via BLE.", "sys");
+      }
+
+      init();
+    </script>
+  </body>
+</html>
