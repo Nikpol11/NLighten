@@ -50,7 +50,9 @@ def start_advertising():
 def connected():
     return ble.connected
 
-def write(msg):
+def write(msg, newline=True):
+    if newline:
+        msg.append("\n")
     uart.write(msg.encode())
     
 def read(in_wait):

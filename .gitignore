@@ -4,3 +4,5 @@ __pycache__/
 .env
 *.DS_Store
 !lib/seeed_xiao_nrf52840.py
+.vscode
+.venv
