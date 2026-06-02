@@ -3,9 +3,9 @@
 Welcome to Nlighten, a project for a Seeed Studio XIAO NRF52840 powered nightlight. It is a versatile smart lighting device designed to give you a light in the dark and fun in the light.
 It is built around the powerful Seeed Studio XIAO nRF52840 microcontroller and features
 Bluetooth Low Energy (BLE) control for seamless interaction with your smartphone or computer.
-<img src="https://github.com/Nikpol11/NLighten/blob/main/img/IMG_0503.JPEG"width="300" height="200">
-<img src="https://github.com/Nikpol11/NLighten/blob/main/img/IMG_9283.JPEG)"width="300" height="200">
-<img src="https://github.com/Nikpol11/NLighten/blob/main/img/IMG_9282.JPEG)"width="300" height="200">
+![alt text](img/IMG_0503.jpg)
+![alt text](img/IMG_9283.jpg)
+![alt text](img/IMG_9282.jpg)
 Whether placed on your nightstand, desk, or shelf, this nightlight offers convenience through a combination of automatic sensor
 adjustments and remote web/mobile control. It is fully compatible with CircuitPython, allowing you to customize its behavior further
 using the extensive libraries available in the ecosystem.
@@ -62,7 +62,7 @@ Text commands generally follow the format "set{option}::{value}". There are exce
 1x [Adafruit NeoPixel Jewel - 7 x 5050 RGBW](https://www.adafruit.com/product/2859) (White color variety is personal preference, white balance just mixes RGB white and dedicated white, and is uncalibrated)<br>
 1x A light dependent resistor capable of operating in the desired range off of 3.3v power, possibly with a voltage divider as in my setup<br>
 <br>
-Optional: A housing and shade. Can be 3D printed, using vase mode for the shade. A Lithium-Ion battery and the required leads and connectors can also be added as well. 
+Optional: A housing and shade. Can be 3D printed, using vase mode for the shade. A Lithium-Ion battery and the required leads and connectors can also be added as well.
 
 ## Board Support
 
