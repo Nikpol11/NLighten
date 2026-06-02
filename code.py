@@ -6,7 +6,6 @@ import lib.seeed_xiao_nrf52840
 import ew_uart as ua
 from LED_Control import LED_Control
 from trueClock import trueClock
-from adafruit_datetime import datetime
 import time
 
 ua.setup("NLighten")
@@ -43,7 +42,7 @@ ONE_SIXTH = 1.0 / 6.0
 TWO_THIRD = 2.0 / 3.0
 
 LED_Controls = LED_Control(led, ldr)
-clock = trueClock(datetime.fromisoformat("2026-06-02T06:56:40.127"))
+clock = trueClock("2026-06-02T06:56:40.127")
 counter = 0
 bleOff = False
 
