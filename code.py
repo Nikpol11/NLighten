@@ -5,6 +5,7 @@ from analogio import AnalogIn, AnalogOut
 import lib.seeed_xiao_nrf52840
 import ew_uart as ua
 from LED_Control import LED_Control
+
 ua.setup("NLighten")
 
 ldr = AnalogIn(board.A1)

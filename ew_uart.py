@@ -1,3 +1,5 @@
+# Originally Written by @sean-morris (https://github.com/sean-morris), modified by @Nikpol11
+
 from adafruit_ble import BLERadio
 from adafruit_ble.advertising.standard import ProvideServicesAdvertisement
 from adafruit_ble.services.nordic import UARTService
@@ -28,7 +30,7 @@ def setup(name):
 def connect():
     ble.start_advertising(advertisement)
     while not ble.connected:
-        
+        time.sleep(0.1)
         pass
     # Now we're connected
     print("Connected!")
