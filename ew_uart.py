@@ -9,14 +9,14 @@ import io
 import time
 
 button_map = {
-    ButtonPacket.BUTTON_1: "1",
-    ButtonPacket.BUTTON_2: "2",
-    ButtonPacket.BUTTON_3: "3",
-    ButtonPacket.BUTTON_4: "4",
-    ButtonPacket.UP: "UP",
-    ButtonPacket.DOWN: "DOWN",
-    ButtonPacket.LEFT: "LEFT",
-    ButtonPacket.RIGHT: "RIGHT",
+    ButtonPacket.BUTTON_1: "1", #b'!B11:'
+    ButtonPacket.BUTTON_2: "2", #b'!B219'
+    ButtonPacket.BUTTON_3: "3", #b'!B318'
+    ButtonPacket.BUTTON_4: "4", #b'!B417'
+    ButtonPacket.UP: "UP",      #b'!B516'
+    ButtonPacket.DOWN: "DOWN",  #b'!B615'
+    ButtonPacket.LEFT: "LEFT",  #b'!B714'
+    ButtonPacket.RIGHT: "RIGHT",#b'!B813'
 }
 
 ble = BLERadio()
@@ -64,14 +64,12 @@ def read(in_wait):
 def in_waiting():
     return uart.in_waiting
 
-# I don't use this method but you could use it to get button presses
-# from the control pad
 def button_press(data):
     packet = Packet.from_stream(io.BytesIO(data))
     if isinstance(packet, ButtonPacket) and packet.pressed:
         packet = Packet.from_stream(io.BytesIO(data))
         if packet.button in button_map:
-            # print(f"{button_map[packet.button]} button pressed!")
+            # print(f"{button_map[packet.button]} button pressed!, {data}")
             return button_map[packet.button]
 
     return None

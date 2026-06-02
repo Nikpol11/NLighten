@@ -1,4 +1,4 @@
-<!-- Generated using Claude 4.6 Sonnet -->
+<!-- Generated using Claude 4.6 Sonnet and ChatGPT 5.5 -->
 <!doctype html>
 <html lang="en">
   <head>
@@ -337,7 +337,7 @@
       }
 
       input[type="range"].wb-slider {
-        background: linear-gradient(to right, #ffaa44, #ffffff);
+        background: linear-gradient(to right, #ffffff, #ffaa44);
       }
 
       input[type="range"]::-webkit-slider-thumb {
@@ -459,6 +459,27 @@
         border-color: var(--accent);
         color: var(--accent);
         background: var(--glow);
+      }
+
+      .btn.quick-off {
+        border-color: var(--accent2);
+        color: var(--accent2);
+        max-width: 180px;
+      }
+
+      .btn.quick-off:hover {
+        background: rgba(255, 107, 53, 0.12);
+      }
+
+      .btn.ble-toggle {
+        border-color: var(--accent);
+        color: var(--accent);
+        max-width: 320px;
+      }
+
+      .btn.ble-toggle.off {
+        border-color: var(--accent2);
+        color: var(--accent2);
       }
 
       .btn.nav {
@@ -618,7 +639,23 @@
     <div class="page">
       <header>
         <div class="logo">N<span>lighten</span></div>
-        <div style="display: flex; align-items: center; gap: 16px">
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+          "
+        >
+          <button
+            class="btn quick-off"
+            id="nightlight-off-btn"
+            onclick="turnNightlightOff()"
+            title="Set brightness to 0"
+          >
+            Nightlight Off
+          </button>
           <span
             style="
               font-family: var(--font-mono);
@@ -652,7 +689,25 @@
 
         <!-- HSV Sliders -->
         <div class="panel">
-          <div class="panel-title">HSV Sliders</div>
+          <div class="panel-title">Brightness</div>
+
+          <div class="slider-row">
+            <div class="slider-label">
+              <span>Brightness</span
+              ><span class="val" id="bright-val">75%</span>
+            </div>
+            <input
+              type="range"
+              class="bright-slider"
+              id="bright-slider"
+              min="0"
+              max="100"
+              value="75"
+              oninput="onBrightSlider(this.value)"
+            />
+          </div>
+          <!-- <div class="panel-title">HSV Sliders</div> -->
+          <div class="panel-title">Hue, Saturation, & White Balance</div>
 
           <div class="slider-row">
             <div class="slider-label">
@@ -684,7 +739,7 @@
             />
           </div>
 
-          <div class="slider-row">
+          <!-- <div class="slider-row">
             <div class="slider-label">
               <span>Value</span><span class="val" id="val-val">100%</span>
             </div>
@@ -697,27 +752,9 @@
               value="100"
               oninput="onValSlider(this.value)"
             />
-          </div>
+          </div> -->
 
           <div class="section-gap"></div>
-          <div class="panel-title">Brightness & White Balance</div>
-
-          <div class="slider-row">
-            <div class="slider-label">
-              <span>Brightness</span
-              ><span class="val" id="bright-val">75%</span>
-            </div>
-            <input
-              type="range"
-              class="bright-slider"
-              id="bright-slider"
-              min="0"
-              max="100"
-              value="75"
-              oninput="onBrightSlider(this.value)"
-            />
-          </div>
-
           <div class="slider-row">
             <div class="slider-label">
               <span>White Balance</span
@@ -866,6 +903,18 @@
       </div>
       <!-- /grid -->
 
+      <div class="panel span-3" style="margin-top: 16px; text-align: center">
+        <div class="panel-title">Bluetooth Reconnection</div>
+        <button
+          class="btn ble-toggle"
+          id="ble-reconnect-btn"
+          onclick="toggleBleReconnect()"
+          title="Toggle whether the device starts advertising again after disconnecting"
+        >
+          Reconnection: On
+        </button>
+      </div>
+
       <footer>
         Nlighten Controller &nbsp;·&nbsp; Web BLE Interface &nbsp;·&nbsp;
         CircuitPython / Seeed XIAO nRF52840
@@ -923,6 +972,7 @@
         val = 1.0;
       let brightness = 0.75;
       let whiteBalance = 0.5;
+      let bleReconnectEnabled = true;
       let ldrLow = 100,
         ldrHigh = 10000;
 
@@ -960,6 +1010,7 @@
           rxChar.addEventListener("characteristicvaluechanged", onRxData);
           setConnected(true);
           log("Connected to NLighten.", "sys");
+          sendCurrentTime();
         } catch (e) {
           log(`Connection failed: ${e.message}`, "err");
         }
@@ -1019,14 +1070,14 @@
         // but the text commands branch handles plain text strings for everything else.
         // For nav buttons, we fake the Bluefruit button packets that the firmware expects.
         const btPackets = {
-          UP: "!B508",
-          DOWN: "!B607",
-          LEFT: "!B806",
-          RIGHT: "!B705",
-          1: "!B109",
-          2: "!B209",
-          3: "!B309",
-          4: "!B409",
+          UP: "b'!B516'",
+          DOWN: "b'!B615'",
+          LEFT: "b'!B714'",
+          RIGHT: "b'!B813'",
+          1: "b'!B11:'",
+          2: "b'!B219'",
+          3: "b'!B318'",
+          4: "b'!B417'",
         };
         if (btPackets[cmd]) {
           sendRaw(btPackets[cmd]);
@@ -1038,6 +1089,11 @@
       function sendTextCmd(cmd) {
         log(cmd, "sent");
         sendRaw(cmd);
+      }
+
+      function sendCurrentTime() {
+        const timestamp = new Date().toISOString();
+        sendTextCmd(`settime::${timestamp}`);
       }
 
       // ──────────────────────────────────────────────
@@ -1276,6 +1332,26 @@
         }, 120);
       }
 
+      function turnNightlightOff() {
+        clearTimeout(brightSendTimer);
+        setBrightnessUI(0);
+        sendTextCmd("setbright::0");
+      }
+
+      function updateBleReconnectButton() {
+        const btn = document.getElementById("ble-reconnect-btn");
+        btn.textContent = bleReconnectEnabled
+          ? "Reconnection: On"
+          : "Reconnection: Off";
+        btn.classList.toggle("off", !bleReconnectEnabled);
+      }
+
+      function toggleBleReconnect() {
+        bleReconnectEnabled = !bleReconnectEnabled;
+        updateBleReconnectButton();
+        sendTextCmd(bleReconnectEnabled ? "ble::enable" : "ble::disable");
+      }
+
       function onWBSlider(v) {
         whiteBalance = parseFloat(v) / 100;
         document.getElementById("wb-val").textContent =
@@ -1344,6 +1420,7 @@
         updateWheelCursor();
         updateColorPreview();
         updateLdrFill();
+        updateBleReconnectButton();
         log("Nlighten web controller ready.", "sys");
         log("Click Connect to pair via BLE.", "sys");
       }
